@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "37358320900",
+    "project_id": "send-a58bb",
+    "storage_bucket": "send-a58bb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:37358320900:android:c555f85d1f3c471992e451",
+        "android_client_info": {
+          "package_name": "com.example.samsungfusic"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "37358320900-fdhd321r0k1aioamk3gk6rmv140engve.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAKGYXauXtX1oB4sxJDWvwAizXH-ZhdNK4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "37358320900-fdhd321r0k1aioamk3gk6rmv140engve.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
