@@ -5,8 +5,11 @@ import android.content.Context;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
+import androidx.lifecycle.Lifecycle;
+import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.samsungfusic.Utils.Constants;
 import com.example.samsungfusic.fragments.AlbumsFragment;
@@ -21,7 +24,7 @@ import com.example.samsungfusic.view_models.MainActivityViewModel;
 public class MainContentViewPagerAdapter extends FragmentStatePagerAdapter {
 
     public MainContentViewPagerAdapter(@NonNull FragmentManager fm) {
-        super(fm);
+        super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
     }
 
     @NonNull

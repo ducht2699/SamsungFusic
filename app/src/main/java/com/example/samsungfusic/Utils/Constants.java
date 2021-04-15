@@ -18,4 +18,9 @@ public interface Constants {
     String CLICK_PAUSE = "com.samsungfusic.pause";
     String CLICK_NEXT = "com.samsungfusic.next";
     String CLICK_CLOSE = "com.samsungfusic.close";
+    String DB_NAME = "SamsungFusic.realm";
+
+
+    String EXCEPTION_ADD_REALM = "EXCEPTION_ADD_REALM";
+    String EXCEPTION_QUERY_REALM = "EXCEPTION_QUERY_REALM";
 }

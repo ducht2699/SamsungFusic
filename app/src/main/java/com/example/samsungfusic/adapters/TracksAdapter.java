@@ -4,29 +4,25 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.SectionIndexer;
+
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.samsungfusic.Utils.INotifyAdapter;
 import com.example.samsungfusic.databinding.TrackItemBinding;
+import com.example.samsungfusic.interfaces.ITrackClickHandler;
 import com.example.samsungfusic.models.Track;
-import com.example.samsungfusic.view_models.MainActivityViewModel;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder>{
     private List<Track> tracks;
     private Context context;
-    private MainActivityViewModel mainActivityViewModel;
+    private ITrackClickHandler iTrackClickHandler;
 
-    public TracksAdapter(List<Track> tracks, Context context, MainActivityViewModel mViewModel) {
+    public TracksAdapter(List<Track> tracks, Context context, ITrackClickHandler iTrackClickHandler) {
         this.tracks = tracks;
         this.context = context;
-        this.mainActivityViewModel = mViewModel;
+        this.iTrackClickHandler = iTrackClickHandler;
     }
 
     @NonNull
@@ -45,7 +41,7 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
         holder.trackItemBinding.rllSong.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mainActivityViewModel.onTrackClicked(track);
+                iTrackClickHandler.onTrackSelected(track);
             }
         });
 

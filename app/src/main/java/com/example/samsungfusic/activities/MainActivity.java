@@ -1,7 +1,6 @@
 package com.example.samsungfusic.activities;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -12,15 +11,15 @@ import android.view.View.OnClickListener;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelStoreOwner;
-import androidx.viewpager.widget.ViewPager;
 
 import com.example.samsungfusic.R;
 import com.example.samsungfusic.Utils.Constants;
 import com.example.samsungfusic.adapters.view_pager_adapter.MainContentViewPagerAdapter;
 import com.example.samsungfusic.broadcasts.MusicReceiver;
 import com.example.samsungfusic.databinding.ActivityMainBinding;
+import com.example.samsungfusic.models.Track;
 import com.example.samsungfusic.view_models.MainActivityViewModel;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayout.OnTabSelectedListener;
@@ -32,40 +31,54 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 
-import kotlin.jvm.internal.Intrinsics;
+import io.realm.Realm;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.AppSettingsDialog.Builder;
 import pub.devrel.easypermissions.EasyPermissions;
 import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks;
 
 
-public final class MainActivity extends AppCompatActivity implements OnClickListener, PermissionCallbacks {
+public  class MainActivity extends AppCompatActivity implements OnClickListener, PermissionCallbacks {
     private ActivityMainBinding mBinding;
     private MainActivityViewModel mViewModel;
-    private MusicReceiver musicReceiver;
 
     public boolean onCreateOptionsMenu(@NotNull Menu menu) {
         return super.onCreateOptionsMenu(menu);
     }
 
     protected void onDestroy() {
+        mViewModel.closeNotification();
+        if(!Realm.getDefaultInstance().isClosed()) {
+            Realm.getDefaultInstance().close();
+        }
         super.onDestroy();
     }
 
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        initComponent();
         initPermission();
+        initComponent();
         initTabLayout();
         initViewPager();
         initNavigationButtons();
         initServices();
         initReceiver();
+        initObserver();
     }
 
-    private final void initReceiver() {
-        this.musicReceiver = new MusicReceiver() {
+    private void initObserver() {
+        mViewModel.getCurrentTrack().observe(this, new Observer<Track>() {
+            @Override
+            public void onChanged(Track track) {
+                mBinding.setTrack(track);
+            }
+        });
+    }
+
+
+    private void initReceiver() {
+        MusicReceiver musicReceiver = new MusicReceiver() {
             public void onReceive(@NotNull Context context, @NotNull Intent intent) {
                 if (intent.getAction().equals(Constants.CLICK_PREVIOUS)) {
                     mViewModel.btnPrevClicked();
@@ -97,25 +110,27 @@ public final class MainActivity extends AppCompatActivity implements OnClickList
         registerReceiver(musicReceiver, intentFilter);
     }
 
-    private final void initServices() {
+    private  void initServices() {
         mViewModel.initService(getApplicationContext());
     }
 
-    private final void initNavigationButtons() {
-        mBinding.btnPlayPause.setOnClickListener((OnClickListener) this);
-        mBinding.btnNext.setOnClickListener((OnClickListener) this);
-        mBinding.btnPrevious.setOnClickListener((OnClickListener) this);
+    private  void initNavigationButtons() {
+        mBinding.btnPlayPause.setOnClickListener(this);
+        mBinding.btnNext.setOnClickListener(this);
+        mBinding.btnPrevious.setOnClickListener(this);
     }
 
-    private final void initViewPager() {
-        mBinding.vpgPlayList.setAdapter(new MainContentViewPagerAdapter(getSupportFragmentManager()));
+    private  void initViewPager() {
+        MainContentViewPagerAdapter adapter = new MainContentViewPagerAdapter(getSupportFragmentManager());
+        mBinding.vpgPlayList.setAdapter(adapter);
         mBinding.vpgPlayList.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mBinding.tloIndicator));
         mBinding.vpgPlayList.setCurrentItem(3);
+        mBinding.vpgPlayList.setOffscreenPageLimit(Constants.FOLDERS + 1);
     }
 
-    private final void initTabLayout() {
+    private  void initTabLayout() {
         mViewModel.setIndicator(mBinding.tloIndicator);
-        mBinding.tloIndicator.addOnTabSelectedListener((OnTabSelectedListener) (new OnTabSelectedListener() {
+        mBinding.tloIndicator.addOnTabSelectedListener((new OnTabSelectedListener() {
             public void onTabSelected(@NotNull Tab tab) {
                 mBinding.vpgPlayList.setCurrentItem(tab.getPosition());
             }
@@ -128,35 +143,35 @@ public final class MainActivity extends AppCompatActivity implements OnClickList
         }));
     }
 
-    private final void initComponent() {
+    private  void initComponent() {
         mBinding.tvSongName.setSelected(true);
         mBinding.tvArtist.setSelected(true);
-        setTitle((CharSequence) "SAMSUNG Fusic");
-        mViewModel = (MainActivityViewModel) (new ViewModelProvider((ViewModelStoreOwner) this)).get(MainActivityViewModel.class);
+        setTitle("SAMSUNG Fusic");
+        mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         mViewModel.setMainBinding(mBinding);
+        mViewModel.createTrackRepo(getApplicationContext());
+        mViewModel.createMusicServices();
     }
 
     public void onClick(@NotNull View v) {
         switch (v.getId()) {
             case R.id.btn_previous:
-                mViewModel.btnPlayClicked();
+                mViewModel.btnPrevClicked();
                 break;
             case R.id.btn_play_pause:
-                mViewModel.btnNextClicked();
+                mViewModel.btnPlayClicked();
                 break;
             case R.id.btn_next:
-                mViewModel.btnPrevClicked();
+                mViewModel.btnNextClicked();
         }
-
     }
 
     @AfterPermissionGranted(123)
-    private final void initPermission() {
-        String[] perms = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
-        if (!EasyPermissions.hasPermissions((Context) this, (String[]) Arrays.copyOf(perms, perms.length))) {
-            EasyPermissions.requestPermissions((Activity) this, "We need permissions because this and that", 123, (String[]) Arrays.copyOf(perms, perms.length));
+    private  void initPermission() {
+        String[] perms = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.WAKE_LOCK};
+        if (!EasyPermissions.hasPermissions( this,  perms)) {
+            EasyPermissions.requestPermissions( this, "We need permissions because this and that", 123,  perms);
         }
-
     }
 
     public void onRequestPermissionsResult(int requestCode, @NotNull String[] permissions, @NotNull int[] grantResults) {
@@ -168,8 +183,8 @@ public final class MainActivity extends AppCompatActivity implements OnClickList
     }
 
     public void onPermissionsDenied(int requestCode, @NotNull List perms) {
-        if (EasyPermissions.somePermissionPermanentlyDenied((Activity) this, perms)) {
-            (new Builder((Activity) this)).build().show();
+        if (EasyPermissions.somePermissionPermanentlyDenied( this, perms)) {
+            (new Builder( this)).build().show();
         }
 
     }

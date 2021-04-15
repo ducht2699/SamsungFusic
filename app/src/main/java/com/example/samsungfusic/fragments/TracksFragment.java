@@ -1,23 +1,23 @@
 package com.example.samsungfusic.fragments;
 
-import android.graphics.Color;
-import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.samsungfusic.R;
 import com.example.samsungfusic.adapters.TracksAdapter;
 import com.example.samsungfusic.databinding.FragmentTracksBinding;
 import com.example.samsungfusic.models.Track;
 import com.example.samsungfusic.view_models.MainActivityViewModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class TracksFragment extends Fragment {
@@ -35,11 +35,26 @@ public class TracksFragment extends Fragment {
         FragmentTracksBinding mBinding = FragmentTracksBinding.inflate(inflater, container, false);
         MainActivityViewModel viewModel = new ViewModelProvider(requireActivity()).get(MainActivityViewModel.class);
         viewModel.createTrackRepo(requireActivity().getApplicationContext());
-
-        TracksAdapter tracksAdapter = new TracksAdapter(viewModel.getTrackList(), getContext(), viewModel);
-        mBinding.rcvTrackList.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false));
+        List<Track> trackList = new ArrayList<>();
+        TracksAdapter tracksAdapter = new TracksAdapter(trackList, getContext(), viewModel);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
+        mBinding.rcvTrackList.setLayoutManager(linearLayoutManager);
         mBinding.rcvTrackList.setAdapter(tracksAdapter);
-        tracksAdapter.notifyDataSetChanged();
+        viewModel.getTempTrack().observe(getViewLifecycleOwner(), new Observer<List<Track>>() {
+            @Override
+            public void onChanged(List<Track> tracks) {
+                mBinding.prgLoading.setVisibility(View.GONE);
+                trackList.addAll(tracks);
+                tracksAdapter.notifyDataSetChanged();
+            }
+        });
+        mBinding.rcvTrackList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+            }
+        });
         return mBinding.getRoot();
     }
 }

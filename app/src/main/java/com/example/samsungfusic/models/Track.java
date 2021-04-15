@@ -4,12 +4,20 @@ import android.graphics.drawable.Drawable;
 
 import androidx.annotation.NonNull;
 
-public class Track{
+import io.realm.Realm;
+import io.realm.RealmObject;
+import io.realm.annotations.Index;
+import io.realm.annotations.PrimaryKey;
+
+public class Track  {
     private String id;
     private String artist;
     private String title;
     private String m_sLocation;
     private Drawable m_iImage;
+
+    public Track() {
+    }
 
     public Track(String id, String artist, String title, String m_sLocation, Drawable m_iImage) {
         this.id = id;

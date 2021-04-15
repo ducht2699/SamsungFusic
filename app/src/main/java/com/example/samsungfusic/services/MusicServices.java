@@ -39,7 +39,7 @@ public class MusicServices extends Service implements MediaPlayer.OnCompletionLi
     }
 
     public boolean isPlaying() {
-        return isPlaying;
+        return true;
     }
 
     @Override

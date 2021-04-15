@@ -58,6 +58,16 @@
                     app:layout_constraintTop_toTopOf="@+id/btn_sort"
                     app:tint="@color/white" />
 
+                <ProgressBar
+                    android:id="@+id/prg_loading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="@id/rcv_track_list" />
+
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rcv_track_list"
                     android:layout_width="0dp"

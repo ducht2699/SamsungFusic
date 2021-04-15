@@ -1,102 +1,89 @@
 package com.example.samsungfusic.repository;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.provider.MediaStore;
-import android.util.Log;
 
-import androidx.annotation.RequiresApi;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.samsungfusic.R;
-import com.example.samsungfusic.Utils.INotifyAdapter;
-import com.example.samsungfusic.fragments.TracksFragment;
 import com.example.samsungfusic.models.Track;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public class TracksRepository {
-    private List<Track> trackList;
     private Context context;
-    private Track currentTrack;
-
-    private MutableLiveData<Track> trackMutableLiveData;
+    private List<Track> trackList;
+    private MutableLiveData<List<Track>> tempTracks;
+    private MutableLiveData<Track> currentTrack;
 
     public TracksRepository(Context context) {
         this.context = context;
-        this.trackList = new ArrayList<>();
-        this.trackMutableLiveData = new MutableLiveData<>();
-        getAllSong();
+        trackList = new ArrayList<>();
+        tempTracks = new MutableLiveData<>();
+        this.currentTrack = new MutableLiveData<>();
+        new AllSong().execute();
     }
 
-    public MutableLiveData<Track> getTrackMutableLiveData() {
-        return trackMutableLiveData;
+    public void setCurrentTrack(Track track) {
+        this.currentTrack.setValue(track);
     }
 
-    public Track getCurrentTrack() {
+    public MutableLiveData<Track> getCurrentTrack() {
         return currentTrack;
     }
 
-    public List<Track> getTrackList() {
-        return trackList;
+    public MutableLiveData<List<Track>> getTempTracks() {
+        return tempTracks;
     }
 
-    public void getAllSong() {
-        new AllSong().execute();
-//        getFromLocal();
-    }
-
-    private Track findTrackByID(String id) {
-        for (Track track : trackList) {
-            if (id.equals(track.getId())) {
-                return track;
-            }
-        }
-        throw new IllegalArgumentException();
-    }
-
-    public Track getNextTrack(Track currentTrack) {
+    public void changePrevious() {
         for (int i = 0; i < trackList.size(); i++) {
-            if (trackList.get(i).getId().equals(currentTrack.getId())) {
-                return trackList.get(i + 1);
-            }
-        }
-        throw new IllegalArgumentException();
-    }
-
-    public Track getPrevTrack(Track currentTrack) {
-        for (int i = 0; i < trackList.size(); i++) {
-            if (trackList.get(i).getId().equals(currentTrack.getId())) {
-                if (i == 0) {
-                    return trackList.get(trackList.size() - 1);
+            if (currentTrack.getValue().getId().equals(trackList.get(i).getId())) {
+                if  (i == 0) {
+                    currentTrack.setValue(trackList.get(trackList.size() - 1));
                 } else {
-                    return trackList.get(i - 1);
+                    currentTrack.setValue(trackList.get(i - 1));
                 }
+                break;
             }
         }
-        throw new IllegalArgumentException();
     }
 
-    private class AllSong extends AsyncTask<Void, Track, Void> {
+//    public List<Track> loadMoreTracks() {
+//        for (int i = 0; i < trackList.size(); i++) {
+//            if (trackList.get(i).getId().equals(tempTracks.get(tempTracks.size() - 1).getId())) {
+//                tempTracks.clear();
+//                if (trackList.size() - 1 - i < 10) {
+//                    tempTracks.addAll(trackList.subList(i + 1, trackList.size() - 1));
+//                } else {
+//                    tempTracks.addAll(trackList.subList(i + 1, i + 1 + 10));
+//                }
+//            }
+//        }
+//        return tempTracks;
+//    }
 
-        @Override
-        protected void onProgressUpdate(Track... values) {
-//            trackList.add(values[0]);
-            trackMutableLiveData.postValue(values[0]);
+    public void changeNext() {
+        for (int i = 0; i < trackList.size(); i++) {
+            if (currentTrack.getValue().getId().equals(trackList.get(i).getId())) {
+                if  (i == trackList.size() - 1) {
+                    currentTrack.setValue(trackList.get(0));
+                } else {
+                    currentTrack.setValue(trackList.get(i + 1));
+                }
+                break;
+            }
         }
+    }
 
+    public class AllSong extends AsyncTask<Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... voids) {
             String selection = MediaStore.Audio.Media.IS_MUSIC + " != 0";
@@ -106,6 +93,7 @@ public class TracksRepository {
                     MediaStore.Audio.Media.TITLE,
                     MediaStore.Audio.Media.DATA
             };
+
             Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, null);
 
             while (cursor.moveToNext()) {
@@ -122,18 +110,16 @@ public class TracksRepository {
                 Track track = new Track(cursor.getString(0)
                         , cursor.getString(1)
                         , cursor.getString(2)
-                        , cursor.getString(3), drawable);
-
-//                trackList.add(track);
-                publishProgress(track);
+                        , cursor.getString(3)
+                        , drawable);
+                trackList.add(track);
+                if (trackList.size() == 8)
+                    tempTracks.postValue(trackList);
+                if (trackList.size() == 2) {
+                    currentTrack.postValue(trackList.get(1));
+                }
             }
-            Log.d("TAGGG", trackList.size() + "");
             return null;
         }
     }
-
-
-
-
-
 }

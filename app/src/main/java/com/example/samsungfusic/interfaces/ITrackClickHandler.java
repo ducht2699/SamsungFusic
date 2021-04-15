@@ -2,6 +2,6 @@ package com.example.samsungfusic.interfaces;
 
 import com.example.samsungfusic.models.Track;
 
-public interface TrackClickHandler {
+public interface ITrackClickHandler {
     void onTrackSelected(Track track);
 }
