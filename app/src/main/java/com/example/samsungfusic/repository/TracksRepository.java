@@ -19,64 +19,51 @@ import java.util.List;
 
 public class TracksRepository {
     private Context context;
-    private List<Track> trackList;
-    private MutableLiveData<List<Track>> tempTracks;
+    private MutableLiveData<List<Track>> trackList;
     private MutableLiveData<Track> currentTrack;
 
+
     public TracksRepository(Context context) {
+
         this.context = context;
-        trackList = new ArrayList<>();
-        tempTracks = new MutableLiveData<>();
+        this.trackList = new MutableLiveData<>();
         this.currentTrack = new MutableLiveData<>();
         new AllSong().execute();
     }
 
     public void setCurrentTrack(Track track) {
-        this.currentTrack.setValue(track);
+        currentTrack.postValue(track);
     }
 
     public MutableLiveData<Track> getCurrentTrack() {
         return currentTrack;
     }
 
-    public MutableLiveData<List<Track>> getTempTracks() {
-        return tempTracks;
+    public MutableLiveData<List<Track>> getTrackList() {
+        return trackList;
     }
 
     public void changePrevious() {
-        for (int i = 0; i < trackList.size(); i++) {
-            if (currentTrack.getValue().getId().equals(trackList.get(i).getId())) {
-                if  (i == 0) {
-                    currentTrack.setValue(trackList.get(trackList.size() - 1));
+        for (int i = 0; i < trackList.getValue().size(); i++) {
+            if (currentTrack.getValue().getId().equals(trackList.getValue().get(i).getId())) {
+                if (i == 0) {
+                    currentTrack.setValue(trackList.getValue().get(trackList.getValue().size() - 1));
                 } else {
-                    currentTrack.setValue(trackList.get(i - 1));
+                    currentTrack.setValue(trackList.getValue().get(i - 1));
                 }
                 break;
             }
         }
     }
 
-//    public List<Track> loadMoreTracks() {
-//        for (int i = 0; i < trackList.size(); i++) {
-//            if (trackList.get(i).getId().equals(tempTracks.get(tempTracks.size() - 1).getId())) {
-//                tempTracks.clear();
-//                if (trackList.size() - 1 - i < 10) {
-//                    tempTracks.addAll(trackList.subList(i + 1, trackList.size() - 1));
-//                } else {
-//                    tempTracks.addAll(trackList.subList(i + 1, i + 1 + 10));
-//                }
-//            }
-//        }
-//        return tempTracks;
-//    }
 
     public void changeNext() {
-        for (int i = 0; i < trackList.size(); i++) {
-            if (currentTrack.getValue().getId().equals(trackList.get(i).getId())) {
-                if  (i == trackList.size() - 1) {
-                    currentTrack.setValue(trackList.get(0));
+        for (int i = 0; i < trackList.getValue().size(); i++) {
+            if (currentTrack.getValue().getId().equals(trackList.getValue().get(i).getId())) {
+                if (i == trackList.getValue().size() - 1) {
+                    currentTrack.setValue(trackList.getValue().get(0));
                 } else {
-                    currentTrack.setValue(trackList.get(i + 1));
+                    currentTrack.setValue(trackList.getValue().get(i + 1));
                 }
                 break;
             }
@@ -95,7 +82,7 @@ public class TracksRepository {
             };
 
             Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, null);
-
+            List<Track> tracks = new ArrayList<>();
             while (cursor.moveToNext()) {
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();
                 mmr.setDataSource(cursor.getString(3));
@@ -112,11 +99,12 @@ public class TracksRepository {
                         , cursor.getString(2)
                         , cursor.getString(3)
                         , drawable);
-                trackList.add(track);
-                if (trackList.size() == 8)
-                    tempTracks.postValue(trackList);
-                if (trackList.size() == 2) {
-                    currentTrack.postValue(trackList.get(1));
+                tracks.add(track);
+                if (tracks.size() == 2) {
+                    currentTrack.postValue(tracks.get(1));
+                }
+                if (tracks.size() == 10) {
+                    trackList.postValue(tracks);
                 }
             }
             return null;

@@ -28,7 +28,6 @@ public class TracksAdapter extends RecyclerView.Adapter<TracksAdapter.ViewHolder
     @NonNull
     @Override
     public TracksAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         LayoutInflater inflater = LayoutInflater.from(context);
         TrackItemBinding trackItemBinding = TrackItemBinding.inflate(inflater, parent, false);
         return new ViewHolder(trackItemBinding);

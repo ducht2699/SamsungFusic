@@ -23,4 +23,5 @@ public interface Constants {
 
     String EXCEPTION_ADD_REALM = "EXCEPTION_ADD_REALM";
     String EXCEPTION_QUERY_REALM = "EXCEPTION_QUERY_REALM";
+    String DEBUG_LIVEDATA = "DEBUG_LIVEDATA";
 }

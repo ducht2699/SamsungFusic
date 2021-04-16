@@ -19,11 +19,12 @@ import com.google.android.material.tabs.TabLayout;
 
 import java.util.List;
 
-public class MainActivityViewModel extends ViewModel implements ITrackClickHandler {
+public class MainActivityViewModel extends ViewModel {
     private IndicatorRepository indicatorRepository;
     private TracksRepository tracksRepository;
     private ActivityMainBinding mainBinding;
     private MusicServices musicServices;
+
 
     public MainActivityViewModel() {
         this.indicatorRepository = new IndicatorRepository();
@@ -82,11 +83,10 @@ public class MainActivityViewModel extends ViewModel implements ITrackClickHandl
 
     }
 
-    public MutableLiveData<List<Track>> getTempTrack() {
-        return tracksRepository.getTempTracks();
+    public MutableLiveData<List<Track>> getTracksList() {
+        return tracksRepository.getTrackList();
     }
 
-    @Override
     public void onTrackSelected(Track track) {
         tracksRepository.setCurrentTrack(track);
     }
@@ -94,4 +94,6 @@ public class MainActivityViewModel extends ViewModel implements ITrackClickHandl
     public MutableLiveData<Track> getCurrentTrack() {
         return tracksRepository.getCurrentTrack();
     }
+
+
 }

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -19,6 +20,7 @@ import com.example.samsungfusic.Utils.Constants;
 import com.example.samsungfusic.adapters.view_pager_adapter.MainContentViewPagerAdapter;
 import com.example.samsungfusic.broadcasts.MusicReceiver;
 import com.example.samsungfusic.databinding.ActivityMainBinding;
+import com.example.samsungfusic.interfaces.ITrackClickHandler;
 import com.example.samsungfusic.models.Track;
 import com.example.samsungfusic.view_models.MainActivityViewModel;
 import com.google.android.material.tabs.TabLayout;
@@ -38,7 +40,7 @@ import pub.devrel.easypermissions.EasyPermissions;
 import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks;
 
 
-public  class MainActivity extends AppCompatActivity implements OnClickListener, PermissionCallbacks {
+public  class MainActivity extends AppCompatActivity implements OnClickListener, PermissionCallbacks, ITrackClickHandler {
     private ActivityMainBinding mBinding;
     private MainActivityViewModel mViewModel;
 
@@ -59,20 +61,18 @@ public  class MainActivity extends AppCompatActivity implements OnClickListener,
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
         initPermission();
         initComponent();
+        initObserver();
         initTabLayout();
         initViewPager();
         initNavigationButtons();
         initServices();
         initReceiver();
-        initObserver();
     }
 
     private void initObserver() {
-        mViewModel.getCurrentTrack().observe(this, new Observer<Track>() {
-            @Override
-            public void onChanged(Track track) {
-                mBinding.setTrack(track);
-            }
+        mViewModel.getCurrentTrack().observe(this, track -> {
+            mBinding.setTrack(track);
+            Log.d(Constants.DEBUG_LIVEDATA, track.toString());
         });
     }
 
@@ -121,7 +121,7 @@ public  class MainActivity extends AppCompatActivity implements OnClickListener,
     }
 
     private  void initViewPager() {
-        MainContentViewPagerAdapter adapter = new MainContentViewPagerAdapter(getSupportFragmentManager());
+        MainContentViewPagerAdapter adapter = new MainContentViewPagerAdapter(getSupportFragmentManager(), this);
         mBinding.vpgPlayList.setAdapter(adapter);
         mBinding.vpgPlayList.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mBinding.tloIndicator));
         mBinding.vpgPlayList.setCurrentItem(3);
@@ -189,5 +189,8 @@ public  class MainActivity extends AppCompatActivity implements OnClickListener,
 
     }
 
-
+    @Override
+    public void onTrackSelected(Track track) {
+        mViewModel.onTrackSelected(track);
+    }
 }

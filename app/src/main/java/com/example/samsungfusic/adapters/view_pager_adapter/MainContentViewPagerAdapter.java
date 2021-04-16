@@ -19,12 +19,14 @@ import com.example.samsungfusic.fragments.FolderFragment;
 import com.example.samsungfusic.fragments.PlaylistFragment;
 import com.example.samsungfusic.fragments.SpotifyFragment;
 import com.example.samsungfusic.fragments.TracksFragment;
+import com.example.samsungfusic.interfaces.ITrackClickHandler;
 import com.example.samsungfusic.view_models.MainActivityViewModel;
 
 public class MainContentViewPagerAdapter extends FragmentStatePagerAdapter {
-
-    public MainContentViewPagerAdapter(@NonNull FragmentManager fm) {
+    private ITrackClickHandler trackClickHandler;
+    public MainContentViewPagerAdapter(@NonNull FragmentManager fm, ITrackClickHandler trackClickHandler) {
         super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
+        this.trackClickHandler = trackClickHandler;
     }
 
     @NonNull
@@ -38,7 +40,7 @@ public class MainContentViewPagerAdapter extends FragmentStatePagerAdapter {
             case Constants.PLAYLISTS:
                 return new PlaylistFragment();
             case Constants.TRACKS:
-                return new TracksFragment();
+                return new TracksFragment(trackClickHandler);
             case Constants.ALBUMS:
                 return new AlbumsFragment();
             case Constants.ARTISTS:
