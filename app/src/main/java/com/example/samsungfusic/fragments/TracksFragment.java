@@ -41,22 +41,12 @@ public class TracksFragment extends Fragment {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getContext(), RecyclerView.VERTICAL, false);
         mBinding.rcvTrackList.setLayoutManager(linearLayoutManager);
         mBinding.rcvTrackList.setAdapter(tracksAdapter);
-        viewModel.getTracksList().observe(getViewLifecycleOwner(), new Observer<List<Track>>() {
+        viewModel.getTrackList().observe(getViewLifecycleOwner(), new Observer<List<Track>>() {
             @Override
             public void onChanged(List<Track> tracks) {
                 mBinding.prgLoading.setVisibility(View.GONE);
                 trackList.addAll(tracks);
                 tracksAdapter.notifyDataSetChanged();
-            }
-        });
-        mBinding.rcvTrackList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-                LinearLayoutManager ln = (LinearLayoutManager) mBinding.rcvTrackList.getLayoutManager();
-                int itemCount = ln.getItemCount();
-                int lastItem = ln.findLastCompletelyVisibleItemPosition();
-
             }
         });
         return mBinding.getRoot();

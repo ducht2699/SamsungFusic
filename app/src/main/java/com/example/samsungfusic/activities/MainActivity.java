@@ -43,6 +43,7 @@ import pub.devrel.easypermissions.EasyPermissions.PermissionCallbacks;
 public  class MainActivity extends AppCompatActivity implements OnClickListener, PermissionCallbacks, ITrackClickHandler {
     private ActivityMainBinding mBinding;
     private MainActivityViewModel mViewModel;
+    private MusicReceiver musicReceiver;
 
     public boolean onCreateOptionsMenu(@NotNull Menu menu) {
         return super.onCreateOptionsMenu(menu);
@@ -50,9 +51,7 @@ public  class MainActivity extends AppCompatActivity implements OnClickListener,
 
     protected void onDestroy() {
         mViewModel.closeNotification();
-        if(!Realm.getDefaultInstance().isClosed()) {
-            Realm.getDefaultInstance().close();
-        }
+        unregisterReceiver(musicReceiver);
         super.onDestroy();
     }
 
@@ -65,20 +64,16 @@ public  class MainActivity extends AppCompatActivity implements OnClickListener,
         initTabLayout();
         initViewPager();
         initNavigationButtons();
-        initServices();
-        initReceiver();
+
     }
 
     private void initObserver() {
-        mViewModel.getCurrentTrack().observe(this, track -> {
-            mBinding.setTrack(track);
-            Log.d(Constants.DEBUG_LIVEDATA, track.toString());
-        });
+        mViewModel.initObserver(this);
     }
 
 
     private void initReceiver() {
-        MusicReceiver musicReceiver = new MusicReceiver() {
+        musicReceiver = new MusicReceiver() {
             public void onReceive(@NotNull Context context, @NotNull Intent intent) {
                 if (intent.getAction().equals(Constants.CLICK_PREVIOUS)) {
                     mViewModel.btnPrevClicked();
@@ -110,9 +105,6 @@ public  class MainActivity extends AppCompatActivity implements OnClickListener,
         registerReceiver(musicReceiver, intentFilter);
     }
 
-    private  void initServices() {
-        mViewModel.initService(getApplicationContext());
-    }
 
     private  void initNavigationButtons() {
         mBinding.btnPlayPause.setOnClickListener(this);
@@ -149,8 +141,10 @@ public  class MainActivity extends AppCompatActivity implements OnClickListener,
         setTitle("SAMSUNG Fusic");
         mViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
         mViewModel.setMainBinding(mBinding);
+
+        initReceiver();
+        mViewModel.initService(getApplicationContext());
         mViewModel.createTrackRepo(getApplicationContext());
-        mViewModel.createMusicServices();
     }
 
     public void onClick(@NotNull View v) {
@@ -191,6 +185,6 @@ public  class MainActivity extends AppCompatActivity implements OnClickListener,
 
     @Override
     public void onTrackSelected(Track track) {
-        mViewModel.onTrackSelected(track);
+        mViewModel.onTrackClicked(track);
     }
 }

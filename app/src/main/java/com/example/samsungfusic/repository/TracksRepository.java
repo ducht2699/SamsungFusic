@@ -1,6 +1,7 @@
 package com.example.samsungfusic.repository;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -32,11 +33,24 @@ public class TracksRepository {
     }
 
     public void setCurrentTrack(Track track) {
-        currentTrack.postValue(track);
+        currentTrack.setValue(track);
+        saveLastTrack();
     }
 
     public MutableLiveData<Track> getCurrentTrack() {
         return currentTrack;
+    }
+
+    private void saveLastTrack() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("lastTrack", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString("idLastTrack", currentTrack.getValue().getId());
+        editor.apply();
+    }
+
+    private String getLastTrackId() {
+        SharedPreferences sharedPreferences = context.getSharedPreferences("lastTrack", Context.MODE_PRIVATE);
+        return sharedPreferences.getString("idLastTrack", null);
     }
 
     public MutableLiveData<List<Track>> getTrackList() {
@@ -51,6 +65,7 @@ public class TracksRepository {
                 } else {
                     currentTrack.setValue(trackList.getValue().get(i - 1));
                 }
+                saveLastTrack();
                 break;
             }
         }
@@ -65,6 +80,7 @@ public class TracksRepository {
                 } else {
                     currentTrack.setValue(trackList.getValue().get(i + 1));
                 }
+                saveLastTrack();
                 break;
             }
         }
@@ -83,6 +99,7 @@ public class TracksRepository {
 
             Cursor cursor = context.getContentResolver().query(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, projection, selection, null, null);
             List<Track> tracks = new ArrayList<>();
+            trackList.postValue(tracks);
             while (cursor.moveToNext()) {
                 MediaMetadataRetriever mmr = new MediaMetadataRetriever();
                 mmr.setDataSource(cursor.getString(3));
@@ -100,11 +117,8 @@ public class TracksRepository {
                         , cursor.getString(3)
                         , drawable);
                 tracks.add(track);
-                if (tracks.size() == 2) {
-                    currentTrack.postValue(tracks.get(1));
-                }
-                if (tracks.size() == 10) {
-                    trackList.postValue(tracks);
+                if (getLastTrackId() != null && track.getId().equals(getLastTrackId())) {
+                    currentTrack.postValue(track);
                 }
             }
             return null;

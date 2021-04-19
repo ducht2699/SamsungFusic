@@ -8,12 +8,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-
         <androidx.core.widget.NestedScrollView
-            android:id="@+id/nest_sv"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
@@ -65,25 +62,24 @@
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@id/rcv_track_list" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rcv_track_list"
                     android:layout_width="0dp"
+                    app:layout_constraintVertical_bias="0.0"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
                     android:nestedScrollingEnabled="false"
                     android:orientation="vertical"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintLeft_toLeftOf="parent"
                     app:layout_constraintRight_toRightOf="parent"
-                    app:layout_constraintTop_toBottomOf="@id/btn_sort"
+                    android:layout_marginTop="16dp"
+                    app:layout_constraintTop_toBottomOf="@+id/btn_shuffle"
                     tools:ignore="UnusedAttribute" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.core.widget.NestedScrollView>
-
-
     </FrameLayout>
 </layout>
